@@ -1,4 +1,4 @@
-package db
+package models
 
 var leaderboardKey = "leaderboard"
 
@@ -17,8 +17,8 @@ func (db *Database) GetLeaderboard() (*Leaderboard, error) {
 	for idx, member := range scores.Val() {
 		users[idx] = &User{
 			Username: member.Member.(string),
-			Points: int(member.Score),
-			Rank: idx,
+			Points:   int(member.Score),
+			Rank:     idx,
 		}
 	}
 	leaderboard := &Leaderboard{
@@ -27,3 +27,5 @@ func (db *Database) GetLeaderboard() (*Leaderboard, error) {
 	}
 	return leaderboard, nil
 }
+
+//https://blog.logrocket.com/how-to-use-redis-as-a-database-with-go-redis/

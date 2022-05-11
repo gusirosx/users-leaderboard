@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"rediboard/db"
+	"rediboard/database"
+	"rediboard/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ var (
 )
 
 func main() {
-	database, err := db.NewDatabase(RedisAddr)
+	database, err := database.NewDatabase(RedisAddr)
 	if err != nil {
 		log.Fatalf("Failed to connect to redis: %s", err.Error())
 	}
@@ -23,13 +24,13 @@ func main() {
 	router.Run(ListenAddr)
 }
 
-func initRouter(database *db.Database) *gin.Engine {
+func initRouter(database *models.Database) *gin.Engine {
 	r := gin.Default()
 	r.GET("/points/:username", func(c *gin.Context) {
 		username := c.Param("username")
 		user, err := database.GetUser(username)
 		if err != nil {
-			if err == db.ErrNil {
+			if err == models.ErrNil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "No record found for " + username})
 				return
 			}
@@ -40,7 +41,7 @@ func initRouter(database *db.Database) *gin.Engine {
 	})
 
 	r.POST("/points", func(c *gin.Context) {
-		var userJson db.User
+		var userJson models.User
 		if err := c.ShouldBindJSON(&userJson); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
