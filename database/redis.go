@@ -13,6 +13,8 @@ package database
 
 import (
 	"context"
+	"log"
+	"os"
 	"rediboard/models"
 
 	"github.com/go-redis/redis/v8"
@@ -30,4 +32,17 @@ func NewDatabase(address string) (*models.Database, error) {
 	return &models.Database{
 		Client: client,
 	}, nil
+}
+
+func RedisInstance() *redis.Client {
+	client := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_IP_PORT"),
+		Password: "",
+		DB:       0,
+	})
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("Failed to connect to redis: %s", err.Error())
+		return nil
+	}
+	return client
 }
