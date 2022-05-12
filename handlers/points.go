@@ -5,46 +5,41 @@ import (
 	"rediboard/models"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 )
 
-//https://blog.logrocket.com/how-to-use-redis-as-a-database-with-go-redis/
-
-var database *redis.Client = database.RedisInstance()
-
-func GetScore(c *gin.Context) {
+func SetScore(ctx *gin.Context) {
 	var userJson models.User
-	if err := c.ShouldBindJSON(&userJson); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&userJson); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := models.SaveUser(&userJson)
+	err := models.SetScore(&userJson)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user": userJson})
+	ctx.JSON(http.StatusOK, gin.H{"user": userJson})
 }
 
-func SetScore(c *gin.Context) {
-	username := c.Param("username")
-	user, err := database.GetUser(username)
+func GetScore(ctx *gin.Context) {
+	username := ctx.Param("username")
+	user, err := models.GetScore(username)
 	if err != nil {
 		if err == models.ErrNil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No record found for " + username})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No record found for " + username})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-func GetLeaderboardfunc(c *gin.Context) {
-	leaderboard, err := database.GetLeaderboard()
+func GetLeaderboard(ctx *gin.Context) {
+	leaderboard, err := models.GetLeaderboard()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"leaderboard": leaderboard})
+	ctx.JSON(http.StatusOK, gin.H{"leaderboard": leaderboard})
 }

@@ -12,12 +12,12 @@ type User struct {
 	Rank     int    `json:"rank"`
 }
 
-func (db *Database) SaveUser(user *User) error {
+func SetScore(user *User) error {
 	member := &redis.Z{
 		Score:  float64(user.Points),
 		Member: user.Username,
 	}
-	pipe := db.Client.TxPipeline()
+	pipe := redisDB.TxPipeline()
 	pipe.ZAdd(Ctx, "leaderboard", member)
 	rank := pipe.ZRank(Ctx, leaderboardKey, user.Username)
 	_, err := pipe.Exec(Ctx)
@@ -29,8 +29,8 @@ func (db *Database) SaveUser(user *User) error {
 	return nil
 }
 
-func (db *Database) GetUser(username string) (*User, error) {
-	pipe := db.Client.TxPipeline()
+func GetScore(username string) (*User, error) {
+	pipe := redisDB.TxPipeline()
 	score := pipe.ZScore(Ctx, leaderboardKey, username)
 	rank := pipe.ZRank(Ctx, leaderboardKey, username)
 	_, err := pipe.Exec(Ctx)

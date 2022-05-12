@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	"net/http"
+	"rediboard/handlers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,71 +40,13 @@ func initializeRoutes(router *gin.Engine) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Page not found"})
 	})
 	//Group user related routes together
-	//userRoutes := router.Group("/users")
-	//UserRoutes(userRoutes)
+	points := router.Group("/points")
+	{
+		// Read user score at /points/:username
+		points.GET("/:username", handlers.GetScore)
+		// Set user score at /points
+		points.POST("", handlers.SetScore)
+	}
+	// Get users leaderboard at /leaderboard
+	router.GET("/leaderboard", handlers.GetLeaderboard)
 }
-
-// func UserRoutes(routes *gin.RouterGroup) {
-// 	// Read users at /users
-// 	routes.GET("", handlers.GetUsers)
-// 	// Read users at /users/ID
-// 	routes.GET("/:id", handlers.GetUser)
-// 	// Create user at /users
-// 	routes.POST("", handlers.CreateUser)
-// 	// Update users at /users
-// 	routes.PUT("/:id", handlers.UpdateUser)
-// 	// Delete users at /users
-// 	routes.DELETE("/:id", handlers.DeleteUser)
-// }
-
-// func main2() {
-// 	database, err := db.NewDatabase(RedisAddr)
-// 	if err != nil {
-// 		log.Fatalf("Failed to connect to redis: %s", err.Error())
-// 	}
-
-// 	router := initRouter(database)
-// 	router.Run(ListenAddr)
-// }
-
-// func initRouter(database *db.Database) *gin.Engine {
-// 	r := gin.Default()
-// 	r.GET("/points/:username", func(c *gin.Context) {
-// 		username := c.Param("username")
-// 		user, err := database.GetUser(username)
-// 		if err != nil {
-// 			if err == db.ErrNil {
-// 				c.JSON(http.StatusNotFound, gin.H{"error": "No record found for " + username})
-// 				return
-// 			}
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 			return
-// 		}
-// 		c.JSON(http.StatusOK, gin.H{"user": user})
-// 	})
-
-// 	r.POST("/points", func(c *gin.Context) {
-// 		var userJson db.User
-// 		if err := c.ShouldBindJSON(&userJson); err != nil {
-// 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 			return
-// 		}
-// 		err := database.SaveUser(&userJson)
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 			return
-// 		}
-// 		c.JSON(http.StatusOK, gin.H{"user": userJson})
-// 	})
-
-// 	r.GET("/leaderboard", func(c *gin.Context) {
-// 		leaderboard, err := database.GetLeaderboard()
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 			return
-// 		}
-// 		c.JSON(http.StatusOK, gin.H{"leaderboard": leaderboard})
-// 	})
-
-// 	return r
-// }

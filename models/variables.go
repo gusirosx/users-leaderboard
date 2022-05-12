@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"rediboard/database"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -12,6 +13,7 @@ var (
 	Ctx    = context.TODO()
 )
 
-type Database struct {
-	Client *redis.Client
-}
+// Create an unexported global variable to hold the database connection pool.
+var redisDB *redis.Client = database.RedisInstance()
+
+//https://blog.logrocket.com/how-to-use-redis-as-a-database-with-go-redis/

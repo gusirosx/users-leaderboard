@@ -1,13 +1,6 @@
 package main
 
-import (
-	"log"
-	"net/http"
-	"rediboard/database"
-	"rediboard/models"
-
-	"github.com/gin-gonic/gin"
-)
+import "rediboard/routes"
 
 var (
 	ListenAddr = "localhost:8080"
@@ -15,53 +8,6 @@ var (
 )
 
 func main() {
-	database, err := database.NewDatabase(RedisAddr)
-	if err != nil {
-		log.Fatalf("Failed to connect to redis: %s", err.Error())
-	}
-
-	router := initRouter(database)
-	router.Run(ListenAddr)
-}
-
-func initRouter(database *models.Database) *gin.Engine {
-	r := gin.Default()
-	r.GET("/points/:username", func(c *gin.Context) {
-		username := c.Param("username")
-		user, err := database.GetUser(username)
-		if err != nil {
-			if err == models.ErrNil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "No record found for " + username})
-				return
-			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"user": user})
-	})
-
-	r.POST("/points", func(c *gin.Context) {
-		var userJson models.User
-		if err := c.ShouldBindJSON(&userJson); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		err := database.SaveUser(&userJson)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"user": userJson})
-	})
-
-	r.GET("/leaderboard", func(c *gin.Context) {
-		leaderboard, err := database.GetLeaderboard()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"leaderboard": leaderboard})
-	})
-
-	return r
+	// Setup GinGonic Routes
+	routes.RoutesSetup()
 }

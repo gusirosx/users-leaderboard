@@ -7,8 +7,8 @@ type Leaderboard struct {
 	Users []*User
 }
 
-func (db *Database) GetLeaderboard() (*Leaderboard, error) {
-	scores := db.Client.ZRangeWithScores(Ctx, leaderboardKey, 0, -1)
+func GetLeaderboard() (*Leaderboard, error) {
+	scores := redisDB.ZRangeWithScores(Ctx, leaderboardKey, 0, -1)
 	if scores == nil {
 		return nil, ErrNil
 	}
